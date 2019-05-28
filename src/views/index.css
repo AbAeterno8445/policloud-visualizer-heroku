@@ -1,0 +1,40 @@
+body {
+  background-color: black;
+  text-align: center;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+svg {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.mainDiv {
+  width: 95vw;
+  height: 95vh;
+}
+
+.lineSVG {
+  position: absolute;
+}
+
+.imgAva {
+  width: 120px;
+  position: absolute;
+  text-align: center;
+  color: #ccc;
+  transform: translateX(0px) translateY(0px);
+}
+
+.imgAva img {
+  width: 120px;
+  height: 120px;
+  display: block;
+  border: 3px solid;
+  border-radius: 50%;
+}
