@@ -199,6 +199,7 @@ function drawConnections() {
 setInterval(drawConnections, 16);
 
 socket.on("newUser", function(data) {
+  console.log(data);
   createAvaElement(data.uid, data.name, data.downloadURL, data.color);
 });
 

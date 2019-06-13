@@ -97,7 +97,8 @@ export class FirebaseHandler {
         this._socketIO.sockets.emit("newUser", {
             uid: id,
             name: username,
-            downloadURL: imgpath
+            downloadURL: imgpath,
+            color: color
         });
         return true;
     }
