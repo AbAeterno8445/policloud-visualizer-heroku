@@ -27,6 +27,8 @@ io.on('connection', function(socket: any) {
     console.log("Received connection from", socket.id);
     var userList = fbaseHandler.userList;
     var connList = fbaseHandler.connectionList;
+    
+    io.sockets.connected[socket.id].emit('avaCount', {count: userList.length});
     userList.forEach(function(user) {
       io.sockets.connected[socket.id].emit('newUser',
       {

@@ -1,23 +1,36 @@
 var socket = io();
 
+//// Globals ////
+// Document elements
 const mainDiv = document.getElementById('mainDiv');
 const lineSVG = document.getElementById('lineSVG');
 const lineSVGdefs = document.getElementById('lineSVGdefs');
 const linetest = document.getElementById('testLine');
 
+// Variables
+var init = false;
+var avaMaxCount = 0;       // Amount of avatars page must render (set from server, used only in page init)
+var avaLocalCount = 0;     // Amount of avatars page has currently rendered
+
+const ava_baseSize = 120;  // Base avatar size
+var ava_currentSize = 0;   // Current avatar size
+const ava_minSize = 35;    // Minimum avatar size
+
+const shuffleDur = 3700;
+////////////////
+
 // Gets the modified position of elements (for avatars)
-function getComputedTranslateXY(obj)
-{
-	const transArr = [];
-    if(!window.getComputedStyle) return;
-    const style = getComputedStyle(obj),
-      transform = style.transform || style.webkitTransform || style.mozTransform;
-    let mat = transform.match(/^matrix3d\((.+)\)$/);    
-    if(mat) return parseFloat(mat[1].split(', ')[13]);
-    mat = transform.match(/^matrix\((.+)\)$/);
-    mat ? transArr.push(parseFloat(mat[1].split(', ')[4])) : 0;
-    mat ? transArr.push(parseFloat(mat[1].split(', ')[5])) : 0;
-    return transArr;
+function getComputedTranslateXY(obj) {
+  const transArr = [];
+  if (!window.getComputedStyle) return;
+  const style = getComputedStyle(obj),
+    transform = style.transform || style.webkitTransform || style.mozTransform;
+  let mat = transform.match(/^matrix3d\((.+)\)$/);
+  if (mat) return parseFloat(mat[1].split(', ')[13]);
+  mat = transform.match(/^matrix\((.+)\)$/);
+  mat ? transArr.push(parseFloat(mat[1].split(', ')[4])) : 0;
+  mat ? transArr.push(parseFloat(mat[1].split(', ')[5])) : 0;
+  return transArr;
 }
 
 function createAvaElement(uid, name, imgpath, color) {
@@ -41,8 +54,13 @@ function createAvaElement(uid, name, imgpath, color) {
   newAva.appendChild(newAvaName);
   mainDiv.appendChild(newAva);
 
-  shuffleAvas();
-  scaleAvas();
+  avaLocalCount++;
+  if (!init && avaMaxCount > 0 && avaLocalCount >= avaMaxCount) {
+    init = true;
+    scaleAvas();
+    shuffleAvas();
+    setInterval(shuffleAvas, shuffleDur);
+  }
 }
 
 function modifyAva(uid, name, imgpath, color) {
@@ -69,33 +87,18 @@ function deleteAva(uid) {
   var delAva = document.getElementById(uid);
   if (delAva) {
     delAva.parentElement.removeChild(delAva);
+    avaLocalCount--;
   }
 }
 
-const shuffleDur = 3700;
 function shuffleAvas() {
   shuffled = true;
   var imgAvaList = document.getElementsByClassName('imgAva');
-  var positions = new Array();
   for (var i = 0; i < imgAvaList.length; i++) {
     var imgChild = imgAvaList[i];
 
-    var foundTarget = false;
-    while (!foundTarget) {
-      var targetX = (mainDiv.offsetWidth - imgChild.offsetWidth) * Math.random();
-      var targetY = (mainDiv.offsetHeight - imgChild.offsetHeight) * Math.random();
-      var fnd = true;
-      positions.forEach(function(pos) {
-        var dx = Math.pow(Math.abs(targetX - pos[0]), 2);
-        var dy = Math.pow(Math.abs(targetY - pos[1]), 2);
-        var dist = Math.sqrt(dx + dy);
-        if (dist <= imgChild.offsetWidth) {
-          fnd = false;
-        }
-      });
-      foundTarget = fnd;
-    }
-    positions.push([targetX, targetY]);
+    var targetX = (mainDiv.offsetWidth - imgChild.offsetWidth) * Math.random();
+    var targetY = (mainDiv.offsetHeight - imgChild.offsetHeight) * Math.random();
     anime({
       targets: imgChild,
       translateX: targetX,
@@ -105,13 +108,12 @@ function shuffleAvas() {
     });
   }
 }
-setInterval(shuffleAvas, shuffleDur);
 
 function scaleAvas() {
-  var baseSize = 120;
   var imgAvaList = document.getElementsByClassName('imgAva');
   if (imgAvaList.length > 10) {
-    var newSize = Math.max(40, baseSize - (imgAvaList.length - 10));
+    var newSize = Math.max(ava_minSize, ava_baseSize - (imgAvaList.length - 10));
+    ava_currentSize = newSize;
     newSize = newSize.toString() + "px";
     for (var i = 0; i < imgAvaList.length; i++) {
       var imgAva = imgAvaList[i];
@@ -185,7 +187,7 @@ function drawConnections() {
     var line = lineList[i];
     var ava1 = document.getElementById(line.getAttribute('usr1'));
     var ava2 = document.getElementById(line.getAttribute('usr2'));
-    
+
     if (ava1 && ava2) {
       var ava1XY = getComputedTranslateXY(ava1);
       var ava2XY = getComputedTranslateXY(ava2);
@@ -198,29 +200,33 @@ function drawConnections() {
 }
 setInterval(drawConnections, 16);
 
-socket.on("newUser", function(data) {
+socket.on("newUser", function (data) {
   console.log(data);
   createAvaElement(data.uid, data.name, data.downloadURL, data.color);
 });
 
-socket.on("modUser", function(data) {
+socket.on("modUser", function (data) {
   modifyAva(data.uid, data.name, data.downloadURL, data.color);
 });
 
-socket.on("delUser", function(data) {
+socket.on("delUser", function (data) {
   deleteAva(data.uid);
 });
 
-socket.on("connUsers", function(data) {
+socket.on("connUsers", function (data) {
   createConnection(data.cid, data.usr1, data.usr2);
 });
 
-socket.on("modConn", function(data) {
+socket.on("modConn", function (data) {
   modifyConnection(data.cid, data.usr1, data.usr2);
 });
 
-socket.on("delConn", function(data) {
+socket.on("delConn", function (data) {
   deleteConnection(data.cid);
+});
+
+socket.on("avaCount", function (data) {
+  avaMaxCount = data.count;
 });
 
 // Connect to server
