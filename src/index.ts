@@ -6,7 +6,7 @@ const http = require('http');
 const socketIO = require('socket.io');
 
 const app = express();
-const port = 8080;
+const port = 8000;
 var server = http.Server(app);
 var io = socketIO(server);
 
@@ -49,6 +49,6 @@ io.on('connection', function(socket: any) {
   });
 });
 
-server.listen( port, () => {
+server.listen( port,() => {
   console.log( `Servidor iniciado: http://localhost:${ port }` );
 } );
