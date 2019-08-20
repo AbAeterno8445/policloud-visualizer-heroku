@@ -11,13 +11,24 @@ const linetest = document.getElementById('testLine');
 var init = false;
 var avaMaxCount = 0;       // Amount of avatars page must render (set from server, used only in page init)
 var avaLocalCount = 0;     // Amount of avatars page has currently rendered
+var docScale = Math.min(mainDiv.offsetWidth / 1366, mainDiv.offsetHeight / 421);
 
-const ava_baseSize = 120;  // Base avatar size
+var ava_baseSize = 120 * docScale;  // Base avatar size
 var ava_currentSize = 0;   // Current avatar size
-const ava_minSize = 35;    // Minimum avatar size
+var ava_minSize = 35 * docScale;    // Minimum avatar size
+
+var freePositions = [];
 
 const shuffleDur = 3700;
 ////////////////
+
+// Update doc scale on resize
+window.onresize = function(event) {
+  docScale = Math.min(mainDiv.offsetWidth / 1366, mainDiv.offsetHeight / 421);
+  ava_baseSize = 120 * docScale;
+  ava_minSize = 35 * docScale;
+  scaleAvas();
+}
 
 // Gets the modified position of elements (for avatars)
 function getComputedTranslateXY(obj) {
@@ -92,21 +103,66 @@ function deleteAva(uid) {
 }
 
 function shuffleAvas() {
+  // Create a random permutation of possible positions
+  var tmpPositions = [];
+  var randPositions = [];
+
+  for (var i = 0; i < freePositions.length; i++) {
+    tmpPositions.push(i);
+  }
+  var i = tmpPositions.length;
+  var j = 0;
+
+  while (i--) {
+      j = Math.floor(Math.random() * (i+1));
+      randPositions.push(tmpPositions[j]);
+      tmpPositions.splice(j,1);
+  }
+
   shuffled = true;
   var imgAvaList = document.getElementsByClassName('imgAva');
   for (var i = 0; i < imgAvaList.length; i++) {
     var imgChild = imgAvaList[i];
 
-    var targetX = (mainDiv.offsetWidth - imgChild.offsetWidth) * Math.random();
-    var targetY = (mainDiv.offsetHeight - imgChild.offsetHeight) * Math.random();
+    var targetPos = freePositions[randPositions[i]];
     anime({
       targets: imgChild,
-      translateX: targetX,
-      translateY: targetY,
+      translateX: targetPos[0],
+      translateY: targetPos[1],
       duration: shuffleDur,
       easing: 'easeInOutCubic'
     });
   }
+}
+
+// Computes free positions in the screen
+function calcFreePositions() {
+  freePositions.length = 0;  // Clear list
+
+  var safeguard = 0;
+  while (freePositions.length < avaMaxCount) {
+    var newPosX = (mainDiv.offsetWidth - ava_currentSize) * Math.random();
+    var newPosY = (mainDiv.offsetHeight - ava_currentSize) * Math.random();
+    
+    // Check if free
+    var free = true;
+    freePositions.forEach(pos => {
+      if (!free) return;
+
+      var dist = Math.sqrt(Math.pow(Math.abs(pos[0] - newPosX), 2) + Math.pow(Math.abs(pos[1] - newPosY), 2))
+      if (dist < ava_currentSize) {
+        free = false;
+      }
+    });
+
+    // Add to list with safeguard
+    safeguard++;
+    if (free || safeguard > 5000) {
+      freePositions.push([newPosX, newPosY]);
+    }
+  }
+
+  console.log(freePositions);
 }
 
 function scaleAvas() {
@@ -126,6 +182,7 @@ function scaleAvas() {
       }
     }
   }
+  calcFreePositions();
 }
 
 function createConnection(id, usr1, usr2) {
