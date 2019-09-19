@@ -174,4 +174,11 @@ export class FirebaseHandler {
             }
         }
     }
+
+    /** Get admin password */
+    public getAdminPass(callback: Function) {
+        this.db.collection('admin/').doc('BWfqG8NEHJcVux1Y0nn8').get().then((doc: any) => {
+            callback(Buffer.from(doc.data().field, 'base64').toString());
+        });
+    }
 }

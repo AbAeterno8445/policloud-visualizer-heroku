@@ -1,5 +1,7 @@
 body {
   background-color: black;
+  background-image: url("fondoPCloud.png");
+  background-size: contain;
   text-align: center;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   overflow: hidden;
@@ -13,11 +15,23 @@ svg {
   right: 0;
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
 }
 
 .mainDiv {
-  width: 95vw;
+  width: 70vw;
   height: 95vh;
+  float: left;
+}
+
+.bannerDiv {
+  width: 18.75vw;
+  height: 98vh;
+  float: right;
+  background-image: url("poliCloudBanner.jpg");
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  background-position-x: center;
 }
 
 .lineSVG {

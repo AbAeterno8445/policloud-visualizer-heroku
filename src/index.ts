@@ -2,24 +2,25 @@ import express from "express";
 import path from "path";
 import {FirebaseHandler} from "./firebaseHandler";
 
-const http = require('http');
-const socketIO = require('socket.io');
+var http = require('http');
+var socketIO = require('socket.io');
 
 const app = express();
 const port = process.env.PORT || 8000;
 var server = http.Server(app);
 var io = socketIO(server);
 
-app.set( "views", path.join( __dirname, "views" ) );
-app.set( "view engine", "ejs" );
+app.set("views", path.join( __dirname, "views"));
+app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/views"));
+app.use(express.urlencoded());
 
 // Init firebase handler
 const fbaseHandler: FirebaseHandler = new FirebaseHandler(io, 'usuarios/', 'conexiones/');
 
-app.get( "/", ( req, res ) => {
+app.get("/", (req, res) => {
   res.render("index");
-} );
+});
 
 io.on('connection', function(socket: any) {
   // User joins the page, send data
