@@ -1,7 +1,5 @@
 body {
-  background-color: black;
-  background-image: url("fondoPCloud.png");
-  background-size: contain;
+  background-color: rgb(0, 0, 80);
   text-align: center;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   overflow: hidden;
@@ -15,13 +13,16 @@ svg {
   right: 0;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
 }
 
 .mainDiv {
   width: 70vw;
   height: 95vh;
   float: left;
+  background-image: url("fondoPCloud.png");
+  background-size: 25%;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 .bannerDiv {

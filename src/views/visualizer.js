@@ -66,11 +66,16 @@ function createAvaElement(uid, name, imgpath, color) {
   mainDiv.appendChild(newAva);
 
   avaLocalCount++;
-  if (!init && avaMaxCount > 0 && avaLocalCount >= avaMaxCount) {
-    init = true;
-    scaleAvas();
-    shuffleAvas();
-    setInterval(shuffleAvas, shuffleDur);
+  if (avaMaxCount > 0) {
+    if (!init && avaLocalCount >= avaMaxCount) {
+      init = true;
+      setInterval(shuffleAvas, shuffleDur);
+      scaleAvas();
+      shuffleAvas();
+    } else if (init) {
+      scaleAvas();
+      shuffleAvas();
+    }
   }
 }
 
@@ -99,6 +104,8 @@ function deleteAva(uid) {
   if (delAva) {
     delAva.parentElement.removeChild(delAva);
     avaLocalCount--;
+    scaleAvas();
+    shuffleAvas();
   }
 }
 
@@ -140,7 +147,7 @@ function calcFreePositions() {
   freePositions.length = 0;  // Clear list
 
   var safeguard = 0;
-  while (freePositions.length < avaMaxCount) {
+  while (freePositions.length < avaLocalCount) {
     var newPosX = (mainDiv.offsetWidth - ava_currentSize) * Math.random();
     var newPosY = (mainDiv.offsetHeight - ava_currentSize) * Math.random();
     
