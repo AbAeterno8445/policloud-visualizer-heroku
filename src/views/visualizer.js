@@ -147,7 +147,7 @@ function calcFreePositions() {
   freePositions.length = 0;  // Clear list
 
   var safeguard = 0;
-  while (freePositions.length < avaLocalCount) {
+  while (freePositions.length < Math.max(12, avaLocalCount)) {
     var newPosX = (mainDiv.offsetWidth - ava_currentSize) * Math.random();
     var newPosY = (mainDiv.offsetHeight - ava_currentSize) * Math.random();
     
